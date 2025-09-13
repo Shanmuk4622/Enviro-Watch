@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { SensorDevice } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal, ArrowUpDown } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 const statusVariantMap: { [key in SensorDevice['status']]: "default" | "destructive" | "secondary" } = {
   Normal: "default",
@@ -108,6 +109,11 @@ export const getColumns = (
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem asChild>
+              <Link href={`/devices/${device.id}`} className="flex items-center cursor-pointer">
+                <Eye className="mr-2 h-4 w-4" /> View Details
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigator.clipboard.writeText(device.id)}>
               Copy Device ID
             </DropdownMenuItem>
