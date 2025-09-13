@@ -2,13 +2,13 @@
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, CheckCircle, ShieldX } from "lucide-react";
-import { mockDevices } from "@/lib/data";
 import { useMemo } from "react";
+import { SensorDevice } from "@/lib/types";
 
-export function StatusBanner() {
+export function StatusBanner({devices}: {devices: SensorDevice[]}) {
   const { overallStatus, message, Icon, variant } = useMemo(() => {
-    const criticalDevice = mockDevices.find((d) => d.status === "Critical");
-    const warningDevice = mockDevices.find((d) => d.status === "Warning");
+    const criticalDevice = devices.find((d) => d.status === "Critical");
+    const warningDevice = devices.find((d) => d.status === "Warning");
 
     if (criticalDevice) {
       return {
@@ -34,7 +34,7 @@ export function StatusBanner() {
       variant: "default" as "default",
       className: "bg-green-500/10 border-green-500/50 text-green-700 dark:text-green-500 [&>svg]:text-green-700 dark:[&>svg]:text-green-500"
     };
-  }, []);
+  }, [devices]);
 
   return (
     <Alert variant={variant} className={message.includes('Elevated') ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-700 dark:text-yellow-400 [&>svg]:text-yellow-700 dark:[&>svg]:text-yellow-400" : message.includes('normal') ? "bg-green-500/10 border-green-500/50 text-green-700 dark:text-green-500 [&>svg]:text-green-700 dark:[&>svg]:text-green-500" : ""}>

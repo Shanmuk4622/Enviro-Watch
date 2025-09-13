@@ -6,10 +6,10 @@ import {
   AdvancedMarker,
 } from "@vis.gl/react-google-maps";
 import { useApiKey } from "@/app/api-key-provider";
-import { mockDevices } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { cn } from "@/lib/utils";
+import { SensorDevice } from "@/lib/types";
 
 const StatusIndicator = ({ status }: { status: "Normal" | "Warning" | "Critical" | "Offline" }) => {
   const baseClasses = "h-3 w-3 rounded-full";
@@ -22,7 +22,7 @@ const StatusIndicator = ({ status }: { status: "Normal" | "Warning" | "Critical"
   return <div className={cn(baseClasses, statusClasses[status])} />;
 };
 
-export function MapWidget() {
+export function MapWidget({devices}: {devices: SensorDevice[]}) {
   const apiKey = useApiKey();
 
   if (!apiKey) {
@@ -53,7 +53,7 @@ export function MapWidget() {
             mapId={"a2f3b4c5d6e7f8g9"}
             className="rounded-b-lg"
           >
-            {mockDevices.map((device) => (
+            {devices.map((device) => (
               <AdvancedMarker key={device.id} position={device.location}>
                 <StatusIndicator status={device.status}/>
               </AdvancedMarker>

@@ -2,8 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, AlertTriangle, ShieldX, PowerOff } from "lucide-react";
-import { mockDevices } from "@/lib/data";
 import { useMemo } from "react";
+import { SensorDevice } from "@/lib/types";
 
 const StatusCard = ({ title, count, Icon, colorClass, animationClass }: { title: string, count: number, Icon: React.ElementType, colorClass: string, animationClass?: string }) => (
   <Card className={`${colorClass} transition-transform hover:scale-105`}>
@@ -21,9 +21,9 @@ const StatusCard = ({ title, count, Icon, colorClass, animationClass }: { title:
   </Card>
 );
 
-export function DeviceSummary() {
+export function DeviceSummary({devices}: {devices: SensorDevice[]}) {
   const summary = useMemo(() => {
-    return mockDevices.reduce(
+    return devices.reduce(
       (acc, device) => {
         if (device.status === 'Critical') acc.critical++;
         else if (device.status === 'Warning') acc.warning++;
@@ -33,7 +33,7 @@ export function DeviceSummary() {
       },
       { normal: 0, warning: 0, critical: 0, offline: 0 }
     );
-  }, []);
+  }, [devices]);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

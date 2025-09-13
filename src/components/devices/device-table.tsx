@@ -28,18 +28,25 @@ import { PlusCircle } from "lucide-react"
 import { SensorDevice } from "@/lib/types"
 import { getColumns } from "./columns"
 import { DeviceDialog } from "./device-dialog"
+import { listenToDevices, addDevice, deleteDevice as deleteDeviceFromDb } from "@/lib/devices"
+import { Skeleton } from "../ui/skeleton"
 
-interface DeviceTableProps {
-  data: SensorDevice[]
-}
-
-export function DeviceTable({ data: initialData }: DeviceTableProps) {
-  const [data, setData] = React.useState<SensorDevice[]>(initialData)
+export function DeviceTable() {
+  const [data, setData] = React.useState<SensorDevice[]>([])
+  const [isLoading, setIsLoading] = React.useState(true);
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const [selectedDevice, setSelectedDevice] = React.useState<SensorDevice | null>(null)
+
+  React.useEffect(() => {
+    const unsubscribe = listenToDevices((devices) => {
+      setData(devices);
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleAddNew = () => {
     setSelectedDevice(null);
@@ -51,19 +58,15 @@ export function DeviceTable({ data: initialData }: DeviceTableProps) {
     setIsDialogOpen(true);
   }
 
-  const handleDelete = (device: SensorDevice) => {
+  const handleDelete = async (device: SensorDevice) => {
     // In a real app, you'd show a confirmation dialog first
-    setData(currentData => currentData.filter(d => d.id !== device.id));
+    if (confirm(`Are you sure you want to delete ${device.name}?`)) {
+      await deleteDeviceFromDb(device.id);
+    }
   }
   
-  const handleSave = (device: SensorDevice) => {
-     setData(currentData => {
-      const exists = currentData.some(d => d.id === device.id);
-      if (exists) {
-        return currentData.map(d => d.id === device.id ? device : d);
-      }
-      return [...currentData, device];
-     });
+  const handleSave = async (device: SensorDevice) => {
+     await addDevice(device);
   }
 
   const columns = React.useMemo(() => getColumns(handleEdit, handleDelete), []);
@@ -82,6 +85,22 @@ export function DeviceTable({ data: initialData }: DeviceTableProps) {
       columnFilters,
     },
   })
+
+  if (isLoading) {
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between py-4">
+                <Skeleton className="h-10 w-64" />
+                <Skeleton className="h-10 w-36" />
+            </div>
+            <Skeleton className="h-96 w-full" />
+            <div className="flex items-center justify-end space-x-2 py-4">
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-20" />
+            </div>
+        </div>
+    )
+  }
 
   return (
     <div>

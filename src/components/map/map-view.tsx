@@ -9,11 +9,11 @@ import {
   useAdvancedMarkerRef,
 } from "@vis.gl/react-google-maps";
 import { useApiKey } from "@/app/api-key-provider";
-import { mockDevices as initialDevices } from "@/lib/data";
 import { SensorDevice } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { cn } from "@/lib/utils";
+import { listenToDevices } from "@/lib/devices";
 
 const StatusIndicator = ({ status }: { status: SensorDevice["status"] }) => {
   const baseClasses = "h-4 w-4 rounded-full border-2 border-white dark:border-slate-900 shadow-lg";
@@ -74,27 +74,11 @@ const MarkerWithInfoWindow = ({ device }: { device: SensorDevice }) => {
 
 export function MapView() {
   const apiKey = useApiKey();
-  const [devices, setDevices] = useState<SensorDevice[]>(initialDevices);
+  const [devices, setDevices] = useState<SensorDevice[]>([]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-        setDevices(currentDevices => 
-            currentDevices.map(device => {
-                if (device.status === 'Offline') return device;
-                // Simulate some data fluctuation
-                let newCoLevel = device.coLevel + (Math.random() - 0.5) * 2;
-                newCoLevel = Math.max(0, Math.min(100, newCoLevel));
-
-                let newStatus: SensorDevice['status'] = 'Normal';
-                if (newCoLevel > 50) newStatus = 'Critical';
-                else if (newCoLevel > 10) newStatus = 'Warning';
-
-                return { ...device, coLevel: parseFloat(newCoLevel.toFixed(1)), status: newStatus };
-            })
-        );
-    }, 5000); // Update every 5 seconds
-
-    return () => clearInterval(interval);
+    const unsubscribe = listenToDevices(setDevices);
+    return () => unsubscribe();
   }, []);
 
   if (!apiKey) {

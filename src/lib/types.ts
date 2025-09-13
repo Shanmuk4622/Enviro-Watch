@@ -6,7 +6,7 @@ export type SensorDevice = {
     lng: number;
     name: string;
   };
-  status: 'Normal' | 'Warning' | 'Critical';
+  status: 'Normal' | 'Warning' | 'Critical' | 'Offline';
   battery: number;
   coLevel: number; // in ppm
   lastReading: string;
