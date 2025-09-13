@@ -8,17 +8,10 @@ import { Label } from "@/components/ui/label";
 import { mockAlertRules } from "@/lib/data";
 import { AlertRule } from "@/lib/types";
 import { BellRing, Edit, PlusCircle } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import { AlertRuleDialog } from '@/components/settings/alert-rule-dialog';
 
 
-function AlertRuleCard({ rule, onToggle }: { rule: AlertRule, onToggle: (id: string, enabled: boolean) => void }) {
+function AlertRuleCard({ rule, onToggle, onEdit }: { rule: AlertRule, onToggle: (id: string, enabled: boolean) => void, onEdit: (rule: AlertRule) => void }) {
   return (
     <Card className="transition-all hover:shadow-md">
       <CardHeader>
@@ -27,7 +20,7 @@ function AlertRuleCard({ rule, onToggle }: { rule: AlertRule, onToggle: (id: str
                 <CardTitle className="flex items-center gap-2"><BellRing className="w-5 h-5 text-primary" /> {rule.name}</CardTitle>
                 <CardDescription>Triggers when CO level is above {rule.threshold} ppm for {rule.timeframe} min.</CardDescription>
             </div>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={() => onEdit(rule)}>
                 <Edit className="w-4 h-4" />
             </Button>
         </div>
@@ -48,6 +41,9 @@ function AlertRuleCard({ rule, onToggle }: { rule: AlertRule, onToggle: (id: str
 
 export default function SettingsPage() {
   const [rules, setRules] = useState(mockAlertRules);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedRule, setSelectedRule] = useState<AlertRule | null>(null);
+
 
   const handleToggle = (id: string, enabled: boolean) => {
     setRules(currentRules =>
@@ -57,6 +53,26 @@ export default function SettingsPage() {
     );
   };
   
+  const handleCreateNew = () => {
+    setSelectedRule(null);
+    setIsDialogOpen(true);
+  };
+
+  const handleEdit = (rule: AlertRule) => {
+    setSelectedRule(rule);
+    setIsDialogOpen(true);
+  }
+
+  const handleSave = (ruleToSave: AlertRule) => {
+    if (selectedRule) {
+      // Update existing rule
+      setRules(rules.map(rule => rule.id === ruleToSave.id ? ruleToSave : rule));
+    } else {
+      // Add new rule
+      setRules([...rules, { ...ruleToSave, id: `RULE-${Date.now()}` }]);
+    }
+  };
+
   return (
     <div className="space-y-6">
        <div>
@@ -67,7 +83,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="flex justify-end">
-        <Button>
+        <Button onClick={handleCreateNew}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Create New Rule
         </Button>
@@ -75,9 +91,16 @@ export default function SettingsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {rules.map(rule => (
-          <AlertRuleCard key={rule.id} rule={rule} onToggle={handleToggle} />
+          <AlertRuleCard key={rule.id} rule={rule} onToggle={handleToggle} onEdit={handleEdit}/>
         ))}
       </div>
+
+      <AlertRuleDialog 
+        rule={selectedRule}
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSave={handleSave}
+      />
     </div>
   );
 }
