@@ -170,3 +170,8 @@ export default function DeviceDetailPage() {
     </div>
   );
 }
+   </div>
+      </div>
+    </div>
+  );
+}
