@@ -3,7 +3,6 @@ import { addDevice } from '@/lib/devices';
 import { SensorDevice } from '@/lib/types';
 import { z } from 'zod';
 
-// Define the schema for input validation
 const deviceSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -21,7 +20,6 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    // Validate the incoming data
     const validation = deviceSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json({ error: 'Invalid device data', details: validation.error.flatten() }, { status: 400 });
@@ -29,13 +27,16 @@ export async function POST(request: Request) {
 
     const deviceData: SensorDevice = {
       ...validation.data,
-      lastReading: new Date().toISOString(), // Add server-side timestamp
+      lastReading: new Date().toISOString(),
     };
+    
+    // Don't wait for the database write to finish.
+    // This sends the response immediately to prevent timeouts.
+    addDevice(deviceData).catch(console.error);
 
-    // Save data to Firestore
-    await addDevice(deviceData);
-
-    return NextResponse.json({ message: 'Device data received and saved successfully', id: deviceData.id }, { status: 201 });
+    // Return a 202 Accepted status to indicate the request was received
+    // and is being processed in the background.
+    return NextResponse.json({ message: 'Device data accepted for processing' }, { status: 202 });
 
   } catch (error: any) {
     console.error('Error in /api/devices POST:', error);
