@@ -30,6 +30,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  serverActions: {
+    bodySizeLimit: '2mb', // Default is 1mb, can be increased if needed
+    serverActions: true,
+    // Increase timeout to 120 seconds (2 minutes)
+    // This can help with longer-running server actions, like initial DB connections.
+    // @ts-ignore
+    timeout: 120,
+  }
 };
 
 export default nextConfig;
