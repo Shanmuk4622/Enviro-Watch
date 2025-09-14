@@ -12,7 +12,6 @@ import {
   SortingState,
   ColumnFiltersState,
 } from "@tanstack/react-table"
-import { useRouter } from "next/navigation";
 
 import {
   Table,
@@ -40,10 +39,9 @@ export function DeviceTable() {
   
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const [selectedDevice, setSelectedDevice] = React.useState<SensorDevice | null>(null)
-  const router = useRouter();
-
 
   React.useEffect(() => {
+    setIsLoading(true);
     const unsubscribe = listenToDevices((devices) => {
       setData(devices);
       setIsLoading(false);
@@ -72,10 +70,6 @@ export function DeviceTable() {
      await addDevice(device);
   }
 
-  const handleRowClick = (deviceId: string) => {
-    router.push(`/devices/${deviceId}`);
-  }
-
   const columns = React.useMemo(() => getColumns(handleEdit, handleDelete), []);
 
   const table = useReactTable({
@@ -91,6 +85,11 @@ export function DeviceTable() {
       sorting,
       columnFilters,
     },
+    initialState: {
+        pagination: {
+            pageSize: 5,
+        }
+    }
   })
 
   if (isLoading) {
@@ -151,16 +150,9 @@ export function DeviceTable() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => handleRowClick(row.original.id)}
-                  className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} onClick={(e) => {
-                      // Prevent row click when clicking on the action menu
-                      if (cell.column.id === 'actions') {
-                        e.stopPropagation();
-                      }
-                    }}>
+                    <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}

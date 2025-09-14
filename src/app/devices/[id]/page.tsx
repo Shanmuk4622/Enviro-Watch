@@ -63,7 +63,10 @@ export default function DeviceDetailPage() {
     if (!deviceId) return;
     setIsLoading(true);
     const unsubscribe = listenToDevice(deviceId, (deviceData) => {
-      setDevice(deviceData);
+      if (deviceData) {
+        setDevice(deviceData);
+      }
+      // Set loading to false even if device is not found to show notFound()
       setIsLoading(false);
     });
     return () => unsubscribe();
@@ -166,11 +169,6 @@ export default function DeviceDetailPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    </div>
-  );
-}
-   </div>
       </div>
     </div>
   );

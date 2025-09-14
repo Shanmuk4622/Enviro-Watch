@@ -59,10 +59,11 @@ export async function deleteDevice(deviceId: string): Promise<void> {
 
 // Function to listen for real-time updates
 export function listenToDevices(callback: (devices: SensorDevice[]) => void) {
-  return onSnapshot(devicesCollection, snapshot => {
+  const unsubscribe = onSnapshot(devicesCollection, async (snapshot) => {
     if (snapshot.empty) {
        // If the collection is empty, populate it with mock data
-      seedDatabase().then(seededDevices => callback(seededDevices));
+      const seededDevices = await seedDatabase();
+      callback(seededDevices);
     } else {
       const devices = snapshot.docs.map(doc => doc.data() as SensorDevice);
       callback(devices);
@@ -70,6 +71,15 @@ export function listenToDevices(callback: (devices: SensorDevice[]) => void) {
   }, (error) => {
     console.error("Error listening to devices:", error);
   });
+  
+  // Check if we need to seed immediately
+  getDocs(devicesCollection).then(snapshot => {
+    if (snapshot.empty) {
+      seedDatabase().then(seededDevices => callback(seededDevices));
+    }
+  });
+
+  return unsubscribe;
 }
 
 // Seed the database with initial mock data if it's empty
