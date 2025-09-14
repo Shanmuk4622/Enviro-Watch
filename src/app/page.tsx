@@ -1,5 +1,6 @@
 "use client";
 
+import "@/lib/post";
 import { StatusBanner } from "@/components/dashboard/status-banner";
 import { DeviceSummary } from "@/components/dashboard/device-summary";
 import { TrendChart } from "@/components/dashboard/trend-chart";

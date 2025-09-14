@@ -1,0 +1,11 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // DANGER: Allow read access to all documents for debugging purposes.
+    match /{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}

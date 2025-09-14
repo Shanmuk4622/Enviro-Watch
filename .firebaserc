@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "studio-2251370852-87c98"
-  }
+    "default": "studio-2251370852-87c98",
+    "pro": "studio-2251370852-87c98"
+  },
+  "targets": {},
+  "etags": {}
 }
