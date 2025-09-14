@@ -28,26 +28,17 @@ import { PlusCircle } from "lucide-react"
 import { SensorDevice } from "@/lib/types"
 import { getColumns } from "./columns"
 import { DeviceDialog } from "./device-dialog"
-import { listenToDevices, addDevice, deleteDevice as deleteDeviceFromDb } from "@/lib/devices"
+import { addDevice, deleteDevice as deleteDeviceFromDb } from "@/lib/devices"
+import { useDevices } from "@/hooks/use-devices"
 import { Skeleton } from "../ui/skeleton"
 
 export function DeviceTable() {
-  const [data, setData] = React.useState<SensorDevice[]>([])
-  const [isLoading, setIsLoading] = React.useState(true);
+  const { devices: data, isLoading } = useDevices();
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const [selectedDevice, setSelectedDevice] = React.useState<SensorDevice | null>(null)
-
-  React.useEffect(() => {
-    setIsLoading(true);
-    const unsubscribe = listenToDevices((devices) => {
-      setData(devices);
-      setIsLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
 
   const handleAddNew = () => {
     setSelectedDevice(null);
@@ -60,7 +51,6 @@ export function DeviceTable() {
   }
 
   const handleDelete = async (device: SensorDevice) => {
-    // In a real app, you'd show a confirmation dialog first
     if (confirm(`Are you sure you want to delete ${device.name}?`)) {
       await deleteDeviceFromDb(device.id);
     }

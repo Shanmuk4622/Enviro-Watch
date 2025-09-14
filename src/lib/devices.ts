@@ -6,8 +6,6 @@ import {
   setDoc,
   deleteDoc,
   onSnapshot,
-  query,
-  where,
   getDoc,
 } from 'firebase/firestore';
 import type { SensorDevice } from './types';
@@ -15,11 +13,24 @@ import { mockDevices } from './data';
 
 const devicesCollection = collection(db, 'devices');
 
-// Function to get all devices once
+// --- SERVER-SIDE & SHARED FUNCTIONS ---
+
+// Add or update a device (Server-side)
+export async function addDevice(device: SensorDevice): Promise<void> {
+  const deviceRef = doc(db, 'devices', device.id);
+  await setDoc(deviceRef, device, { merge: true });
+}
+
+// Delete a device (Server-side)
+export async function deleteDevice(deviceId: string): Promise<void> {
+  const deviceRef = doc(db, 'devices', deviceId);
+  await deleteDoc(deviceRef);
+}
+
+// Get all devices once (Server-side)
 export async function getDevices(): Promise<SensorDevice[]> {
   const snapshot = await getDocs(devicesCollection);
   if (snapshot.empty) {
-    // If the collection is empty, populate it with mock data
     await seedDatabase();
     const seededSnapshot = await getDocs(devicesCollection);
     return seededSnapshot.docs.map(doc => doc.data() as SensorDevice);
@@ -27,7 +38,36 @@ export async function getDevices(): Promise<SensorDevice[]> {
   return snapshot.docs.map(doc => doc.data() as SensorDevice);
 }
 
-// Function to listen for real-time updates on a single device
+// Seed the database with initial mock data if it's empty
+export async function seedDatabase(): Promise<SensorDevice[]> {
+    console.log("Database is empty, seeding with mock data...");
+    const promises = mockDevices.map(device => {
+        const deviceRef = doc(db, 'devices', device.id);
+        return setDoc(deviceRef, device);
+    });
+    await Promise.all(promises);
+    console.log("Database seeded successfully.");
+    return mockDevices;
+}
+
+// --- REAL-TIME LISTENER FUNCTIONS (Can be used on client) ---
+
+// Listen for real-time updates on all devices
+export function listenToDevices(callback: (devices: SensorDevice[]) => void) {
+  return onSnapshot(devicesCollection, async (snapshot) => {
+    if (snapshot.empty) {
+      const seededDevices = await seedDatabase();
+      callback(seededDevices);
+    } else {
+      const devices = snapshot.docs.map(doc => doc.data() as SensorDevice);
+      callback(devices);
+    }
+  }, (error) => {
+    console.error("Error listening to devices:", error);
+  });
+}
+
+// Listen for real-time updates on a single device
 export function listenToDevice(deviceId: string, callback: (device: SensorDevice | null) => void) {
   const deviceRef = doc(db, 'devices', deviceId);
   return onSnapshot(deviceRef, (doc) => {
@@ -40,54 +80,4 @@ export function listenToDevice(deviceId: string, callback: (device: SensorDevice
     console.error(`Error listening to device ${deviceId}:`, error);
     callback(null);
   });
-}
-
-
-// Function to add or update a device
-export async function addDevice(device: SensorDevice): Promise<void> {
-  const deviceRef = doc(db, 'devices', device.id);
-  await setDoc(deviceRef, device, { merge: true });
-}
-
-// Function to delete a device
-export async function deleteDevice(deviceId: string): Promise<void> {
-  const deviceRef = doc(db, 'devices', deviceId);
-  await deleteDoc(deviceRef);
-}
-
-// Function to listen for real-time updates
-export function listenToDevices(callback: (devices: SensorDevice[]) => void) {
-  const unsubscribe = onSnapshot(devicesCollection, async (snapshot) => {
-    if (snapshot.empty) {
-       // If the collection is empty, populate it with mock data
-      const seededDevices = await seedDatabase();
-      callback(seededDevices);
-    } else {
-      const devices = snapshot.docs.map(doc => doc.data() as SensorDevice);
-      callback(devices);
-    }
-  }, (error) => {
-    console.error("Error listening to devices:", error);
-  });
-  
-  // Check if we need to seed immediately
-  getDocs(devicesCollection).then(snapshot => {
-    if (snapshot.empty) {
-      seedDatabase().then(seededDevices => callback(seededDevices));
-    }
-  });
-
-  return unsubscribe;
-}
-
-// Seed the database with initial mock data if it's empty
-async function seedDatabase(): Promise<SensorDevice[]> {
-    console.log("Database is empty, seeding with mock data...");
-    const promises = mockDevices.map(device => {
-        const deviceRef = doc(db, 'devices', device.id);
-        return setDoc(deviceRef, device);
-    });
-    await Promise.all(promises);
-    console.log("Database seeded successfully.");
-    return mockDevices;
 }
