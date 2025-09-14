@@ -30,13 +30,9 @@ export async function POST(request: Request) {
       lastReading: new Date().toISOString(),
     };
     
-    // Don't wait for the database write to finish.
-    // This sends the response immediately to prevent timeouts.
-    addDevice(deviceData).catch(console.error);
+    await addDevice(deviceData);
 
-    // Return a 202 Accepted status to indicate the request was received
-    // and is being processed in the background.
-    return NextResponse.json({ message: 'Device data accepted for processing' }, { status: 202 });
+    return NextResponse.json({ message: 'Device data successfully added' }, { status: 200 });
 
   } catch (error: any) {
     console.error('Error in /api/devices POST:', error);
