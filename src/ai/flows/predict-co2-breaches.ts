@@ -40,7 +40,7 @@ const prompt = ai.definePrompt({
   name: 'predictCO2BreachesPrompt',
   input: {schema: PredictCO2BreachesInputSchema},
   output: {schema: PredictCO2BreachesOutputSchema},
-  model: 'gemini-pro',
+  model: 'gemini-1.5-flash',
   prompt: `You are an expert AI assistant specializing in predicting CO2 concentration breaches in specific zones.
 
 You will receive historical CO2 data, the current time, and an alert threshold.
