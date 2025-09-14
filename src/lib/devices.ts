@@ -5,8 +5,8 @@ import {
   getDocs,
   setDoc,
   deleteDoc,
-  onSnapshot,
   getDoc,
+  onSnapshot,
 } from 'firebase/firestore';
 import type { SensorDevice } from './types';
 import { mockDevices } from './data';
@@ -50,12 +50,12 @@ export async function seedDatabase(): Promise<SensorDevice[]> {
     return mockDevices;
 }
 
-// --- REAL-TIME LISTENER FUNCTIONS (Can be used on client) ---
-
 // Listen for real-time updates on all devices
 export function listenToDevices(callback: (devices: SensorDevice[]) => void) {
   return onSnapshot(devicesCollection, async (snapshot) => {
     if (snapshot.empty) {
+      // Temporarily call seed from here for initial setup.
+      // Note: This might be better handled on server startup in a real app.
       const seededDevices = await seedDatabase();
       callback(seededDevices);
     } else {

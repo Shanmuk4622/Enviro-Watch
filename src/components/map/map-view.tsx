@@ -13,7 +13,7 @@ import { SensorDevice } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { cn } from "@/lib/utils";
-import { listenToDevices } from "@/lib/devices";
+import { listenToDevices } from "@/hooks/use-devices";
 
 const StatusIndicator = ({ status }: { status: SensorDevice["status"] }) => {
   const baseClasses = "h-4 w-4 rounded-full border-2 border-white dark:border-slate-900 shadow-lg";

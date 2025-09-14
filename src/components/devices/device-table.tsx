@@ -28,7 +28,7 @@ import { PlusCircle } from "lucide-react"
 import { SensorDevice } from "@/lib/types"
 import { getColumns } from "./columns"
 import { DeviceDialog } from "./device-dialog"
-import { addDevice, deleteDevice as deleteDeviceFromDb } from "@/lib/devices"
+import { addDevice, deleteDevice } from "@/lib/devices"
 import { useDevices } from "@/hooks/use-devices"
 import { Skeleton } from "../ui/skeleton"
 
@@ -52,11 +52,13 @@ export function DeviceTable() {
 
   const handleDelete = async (device: SensorDevice) => {
     if (confirm(`Are you sure you want to delete ${device.name}?`)) {
-      await deleteDeviceFromDb(device.id);
+      // This is now calling a server action implicitly
+      await deleteDevice(device.id);
     }
   }
   
   const handleSave = async (device: SensorDevice) => {
+     // This is now calling a server action implicitly
      await addDevice(device);
   }
 

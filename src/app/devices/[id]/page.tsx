@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, notFound } from 'next/navigation';
-import { listenToDevice } from '@/lib/devices';
+import { listenToDevice } from '@/hooks/use-devices';
 import { SensorDevice } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

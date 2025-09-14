@@ -8,7 +8,7 @@ import { Suspense, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SensorDevice } from "@/lib/types";
-import { listenToDevices } from "@/lib/devices";
+import { listenToDevices } from "@/hooks/use-devices";
 
 export default function Home() {
   const [devices, setDevices] = useState<SensorDevice[]>([]);

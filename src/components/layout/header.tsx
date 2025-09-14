@@ -16,7 +16,7 @@ import { Bell, LifeBuoy, LogOut, Settings, User, ShieldX } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
 import { SensorDevice } from '@/lib/types';
-import { listenToDevices } from '@/lib/devices';
+import { listenToDevices } from '@/hooks/use-devices';
 
 const getPageTitle = (pathname: string) => {
   switch (pathname) {
