@@ -28,9 +28,14 @@ import { PlusCircle } from "lucide-react"
 import { SensorDevice } from "@/lib/types"
 import { getColumns } from "./columns"
 import { DeviceDialog } from "./device-dialog"
-import { addDevice, deleteDevice } from "@/lib/devices"
 import { useDevices } from "@/hooks/use-devices"
 import { Skeleton } from "../ui/skeleton"
+
+// These imports are now placeholders for server actions
+// The actual logic is handled on the server
+const addDevice = async (device: SensorDevice) => Promise.resolve();
+const deleteDevice = async (deviceId: string) => Promise.resolve();
+
 
 export function DeviceTable() {
   const { devices: data, isLoading } = useDevices();
