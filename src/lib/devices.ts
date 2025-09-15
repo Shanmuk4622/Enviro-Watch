@@ -1,67 +1,66 @@
-import { db } from './firebase';
+import { db } from './firebase'; // Client-side DB
+import { adminDb } from './firebase-admin'; // Server-side DB
 import {
   collection,
   doc,
   getDocs,
   setDoc,
   deleteDoc,
-  getDoc,
   onSnapshot,
-} from 'firebase/firestore';
+} from 'firebase/firestore'; // Client-side Firestore functions
 import type { SensorDevice } from './types';
 import { mockDevices } from './data';
 
-const devicesCollection = collection(db, 'devices');
+// --- SERVER-SIDE FUNCTIONS (using Admin SDK) ---
 
-// --- SERVER-SIDE & SHARED FUNCTIONS ---
+const devicesAdminCollection = adminDb.collection('devices');
 
 // Add or update a device (Server-side)
 export async function addDevice(device: SensorDevice): Promise<void> {
-  const deviceRef = doc(db, 'devices', device.id);
-  await setDoc(deviceRef, device, { merge: true });
+  const deviceRef = devicesAdminCollection.doc(device.id);
+  await deviceRef.set(device, { merge: true });
 }
 
 // Delete a device (Server-side)
 export async function deleteDevice(deviceId: string): Promise<void> {
-  const deviceRef = doc(db, 'devices', deviceId);
-  await deleteDoc(deviceRef);
+  const deviceRef = devicesAdminCollection.doc(deviceId);
+  await deviceRef.delete();
 }
 
 // Get all devices once (Server-side)
 export async function getDevices(): Promise<SensorDevice[]> {
-  const snapshot = await getDocs(devicesCollection);
+  const snapshot = await devicesAdminCollection.get();
   if (snapshot.empty) {
     await seedDatabase();
-    const seededSnapshot = await getDocs(devicesCollection);
+    const seededSnapshot = await devicesAdminCollection.get();
     return seededSnapshot.docs.map(doc => doc.data() as SensorDevice);
   }
   return snapshot.docs.map(doc => doc.data() as SensorDevice);
 }
 
-// Seed the database with initial mock data if it's empty
+// Seed the database with initial mock data if it's empty (Server-side)
 export async function seedDatabase(): Promise<SensorDevice[]> {
     console.log("Database is empty, seeding with mock data...");
-    const promises = mockDevices.map(device => {
-        const deviceRef = doc(db, 'devices', device.id);
-        return setDoc(deviceRef, device);
+    const batch = adminDb.batch();
+    mockDevices.forEach(device => {
+        const deviceRef = devicesAdminCollection.doc(device.id);
+        batch.set(deviceRef, device);
     });
-    await Promise.all(promises);
+    await batch.commit();
     console.log("Database seeded successfully.");
     return mockDevices;
 }
 
+
+// --- CLIENT-SIDE FUNCTIONS (using Client SDK) ---
+
+const devicesClientCollection = collection(db, 'devices');
+
 // Listen for real-time updates on all devices
 export function listenToDevices(callback: (devices: SensorDevice[]) => void) {
-  return onSnapshot(devicesCollection, async (snapshot) => {
-    if (snapshot.empty) {
-      // Temporarily call seed from here for initial setup.
-      // Note: This might be better handled on server startup in a real app.
-      const seededDevices = await seedDatabase();
-      callback(seededDevices);
-    } else {
-      const devices = snapshot.docs.map(doc => doc.data() as SensorDevice);
-      callback(devices);
-    }
+  return onSnapshot(devicesClientCollection, async (snapshot) => {
+    const devices = snapshot.docs.map(doc => doc.data() as SensorDevice);
+    callback(devices);
   }, (error) => {
     console.error("Error listening to devices:", error);
   });

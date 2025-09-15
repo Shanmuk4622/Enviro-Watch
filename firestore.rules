@@ -2,10 +2,14 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // DANGER: Allow read access to all documents for debugging purposes.
+    // Allow read access to all documents for now
     match /{document=**} {
       allow read: if true;
-      allow write: if false;
+    }
+
+    // Allow write access to the devices collection only
+    match /devices/{deviceId} {
+      allow write: if true;
     }
   }
 }
