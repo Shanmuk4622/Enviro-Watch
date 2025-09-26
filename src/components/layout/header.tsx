@@ -14,9 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Bell, LifeBuoy, LogOut, Settings, User, ShieldX } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useEffect, useState } from 'react';
-import { SensorDevice } from '@/lib/types';
-import { listenToDevices } from '@/hooks/use-devices';
+import { useDevices } from '@/hooks/use-devices';
 
 const getPageTitle = (pathname: string) => {
   switch (pathname) {
@@ -35,12 +33,7 @@ const getPageTitle = (pathname: string) => {
 
 export function Header() {
   const pathname = usePathname();
-  const [devices, setDevices] = useState<SensorDevice[]>([]);
-
-  useEffect(() => {
-    const unsubscribe = listenToDevices(setDevices);
-    return () => unsubscribe();
-  }, []);
+  const { devices } = useDevices();
 
   const criticalDevices = devices.filter(d => d.status === 'Critical');
   const criticalAlerts = criticalDevices.length;

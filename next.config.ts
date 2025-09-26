@@ -30,9 +30,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  serverActions: {
-    bodySizeLimit: '2mb', // Default is 1mb, can be increased if needed
-  },
 };
 
 export default nextConfig;
